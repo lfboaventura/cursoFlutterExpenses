@@ -66,6 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  _removeTransaction(String id) {
+    setState(() {
+      _transactions.removeWhere((tr) => tr.id == id);
+    });
+  }
+
   _addTransaction(String title, double value, DateTime date) {
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
@@ -97,8 +103,19 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: Text(
+                'Despesas Últimos 7 Dias',
+                style: Theme.of(context).textTheme.headline6,
+                textAlign: TextAlign.center,
+              ),
+            ),
             Chart(_recentTransactions),
-            TransactionList(_transactions),
+            TransactionList(
+              _transactions,
+              _removeTransaction,
+            ),
           ],
         ),
       ),
