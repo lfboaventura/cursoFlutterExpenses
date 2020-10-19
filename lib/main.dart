@@ -48,6 +48,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _transactions = [];
+  bool _showChart = false;
 
   List<Transaction> get _recentTransactions {
     return _transactions.where((tr) {
@@ -89,33 +90,86 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Despesas Pessoais'),
-        actions: <Widget>[
+    bool isLandScape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final appBar = AppBar(
+      title: Text('Despesas Pessoais'),
+      actions: <Widget>[
+        if (isLandScape)
           IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _openTransactionFormModal(context),
-          )
-        ],
+            icon: Icon(_showChart ? Icons.list : Icons.show_chart),
+            onPressed: () {
+              setState(() {
+                _showChart = !_showChart;
+              });
+            },
+          ),
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () => _openTransactionFormModal(context),
+        ),
+      ],
+    );
+
+    final titleChart = Padding(
+      padding: const EdgeInsets.all(6),
+      child: Text(
+        'Últimos 7 Dias',
+        style: Theme.of(context).textTheme.headline6,
+        textAlign: TextAlign.center,
       ),
+    );
+
+    final availabelHeight = MediaQuery.of(context).size.height -
+        appBar.preferredSize.height -
+        MediaQuery.of(context).padding.top -
+        39;
+
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: Text(
-                'Despesas Últimos 7 Dias',
-                style: Theme.of(context).textTheme.headline6,
-                textAlign: TextAlign.center,
+            // Padding(
+            //   padding: const EdgeInsets.all(6),
+            //   child: Text(
+            //     'Últimos 7 Dias',
+            //     style: Theme.of(context).textTheme.headline6,
+            //     textAlign: TextAlign.center,
+            //   ),
+            // ),
+            if (_showChart || !isLandScape) titleChart,
+
+            // if (_showChart && isLandScape)
+            //   Row(
+            //     mainAxisAlignment: MainAxisAlignment.end,
+            //     children: <Widget>[
+            //       Text('Exbir Gráfico'),
+            //       Switch(
+            //         value: _showChart,
+            //         onChanged: (value) {
+            //           setState(() {
+            //             _showChart = value;
+            //           });
+            //         },
+            //       ),
+            //     ],
+            //   ),
+            if (_showChart || !isLandScape)
+              Container(
+                height: availabelHeight * (isLandScape ? 0.9 : 0.30),
+                child: Chart(_recentTransactions),
               ),
-            ),
-            Chart(_recentTransactions),
-            TransactionList(
-              _transactions,
-              _removeTransaction,
-            ),
+            if (!_showChart || !isLandScape)
+              Container(
+                height: availabelHeight * (isLandScape ? 1 : 0.70),
+                child: TransactionList(
+                  _transactions,
+                  _removeTransaction,
+                ),
+              ),
           ],
         ),
       ),
